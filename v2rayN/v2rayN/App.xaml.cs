@@ -51,6 +51,20 @@ public partial class App
 
         base.OnStartup(e);
 
+        // 智飞云：面板登录检查
+        if (!ServiceLib.Handler.Panel.PanelSession.IsLoggedIn)
+        {
+            var loginWindow = new Views.PanelLoginWindow();
+            var loginResult = loginWindow.ShowDialog();
+            if (loginResult != true || !loginWindow.LoginSucceeded)
+            {
+                // 用户取消登录，退出应用
+                Shutdown();
+                return;
+            }
+            // 登录成功，自动导入面板订阅（在主窗口显示后触发）
+        }
+
         var mainWindowViewModel = new MainWindowViewModel();
         var viewFor = SimpleViewLocator.Instance.ResolveView(mainWindowViewModel);
         viewFor!.ViewModel = mainWindowViewModel;
@@ -58,6 +72,26 @@ public partial class App
         var mainWindow = (MainWindow)viewFor;
         mainWindow.Show();
         MainWindow = mainWindow;
+
+        // 智飞云：登录成功后自动导入面板订阅
+        if (ServiceLib.Handler.Panel.PanelSession.IsLoggedIn)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(1000); // 等主窗口初始化完成
+                    await Dispatcher.InvokeAsync(async () =>
+                    {
+                        await PanelSubscriptionImporter.ImportAsync(mainWindowViewModel);
+                    });
+                }
+                catch (Exception ex)
+                {
+                    ServiceLib.Handler.Logging.SaveLog("PanelAutoImport", ex);
+                }
+            });
+        }
     }
 
     private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

@@ -62,6 +62,11 @@ public partial class MainWindow
             this.BindCommand(ViewModel, vm => vm.SubGroupUpdateCmd, v => v.menuSubGroupUpdate).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.SubGroupUpdateViaProxyCmd, v => v.menuSubGroupUpdateViaProxy).DisposeWith(disposables);
 
+            //智飞云面板
+            this.BindCommand(ViewModel, vm => vm.PanelAccountCmd, v => v.menuPanelAccount).DisposeWith(disposables);
+            this.BindCommand(ViewModel, vm => vm.PanelShopCmd, v => v.menuPanelShop).DisposeWith(disposables);
+            this.BindCommand(ViewModel, vm => vm.PanelLogoutCmd, v => v.menuPanelLogout).DisposeWith(disposables);
+
             //setting
             this.BindCommand(ViewModel, vm => vm.OptionSettingCmd, v => v.menuOptionSetting).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.RoutingSettingCmd, v => v.menuRoutingSetting).DisposeWith(disposables);

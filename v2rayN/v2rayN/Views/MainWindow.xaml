@@ -243,6 +243,25 @@
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuOpenTheFileLocation}" />
                             </MenuItem>
+                            <MenuItem Padding="{StaticResource MarginLeftRight8}">
+                                <MenuItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="智飞云" />
+                                    </StackPanel>
+                                </MenuItem.Header>
+                                <MenuItem
+                                    x:Name="menuPanelAccount"
+                                    Height="{StaticResource MenuItemHeight}"
+                                    Header="我的账户" />
+                                <MenuItem
+                                    x:Name="menuPanelShop"
+                                    Height="{StaticResource MenuItemHeight}"
+                                    Header="购买套餐" />
+                                <MenuItem
+                                    x:Name="menuPanelLogout"
+                                    Height="{StaticResource MenuItemHeight}"
+                                    Header="退出登录" />
+                            </MenuItem>
                         </Menu>
                         <Separator />
                         <Menu Margin="0,1" Style="{StaticResource ToolbarMenu}">

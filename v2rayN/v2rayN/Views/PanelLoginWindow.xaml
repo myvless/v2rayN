@@ -1,0 +1,43 @@
+<Window
+    x:Class="v2rayN.Views.PanelLoginWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="智飞云 - 面板登录"
+    Width="380"
+    Height="320"
+    WindowStartupLocation="CenterScreen"
+    ResizeMode="NoResize">
+    <StackPanel Margin="24" VerticalAlignment="Center">
+        <TextBlock
+            Text="智飞云"
+            FontSize="24"
+            FontWeight="Bold"
+            HorizontalAlignment="Center"
+            Margin="0,0,0,16" />
+        <TextBlock Text="邮箱" Margin="0,0,0,4" />
+        <TextBox
+            x:Name="txtEmail"
+            Height="32"
+            Margin="0,0,0,12" />
+        <TextBlock Text="密码" Margin="0,0,0,4" />
+        <PasswordBox
+            x:Name="txtPassword"
+            Height="32"
+            Margin="0,0,0,16" />
+        <Button
+            x:Name="btnLogin"
+            Content="登录"
+            Height="36"
+            Margin="0,0,0,8"
+            Click="BtnLogin_Click" />
+        <TextBlock HorizontalAlignment="Center">
+            <Hyperlink x:Name="linkRegister" Click="LinkRegister_Click">没有账号？去注册</Hyperlink>
+        </TextBlock>
+        <TextBlock
+            x:Name="txtError"
+            Foreground="Red"
+            TextWrapping="Wrap"
+            Margin="0,8,0,0"
+            HorizontalAlignment="Center" />
+    </StackPanel>
+</Window>

@@ -49,6 +49,13 @@ public partial class MainWindowViewModel : MyReactiveObject
     public ReactiveCommand<RxVoid, RxVoid> SubGroupUpdateCmd { get; }
     public ReactiveCommand<RxVoid, RxVoid> SubGroupUpdateViaProxyCmd { get; }
 
+    //智飞云面板
+    public ReactiveCommand<RxVoid, RxVoid> PanelAccountCmd { get; }
+
+    public ReactiveCommand<RxVoid, RxVoid> PanelShopCmd { get; }
+
+    public ReactiveCommand<RxVoid, RxVoid> PanelLogoutCmd { get; }
+
     //Setting
     public ReactiveCommand<RxVoid, RxVoid> OptionSettingCmd { get; }
 
@@ -195,6 +202,32 @@ public partial class MainWindowViewModel : MyReactiveObject
         SubGroupUpdateViaProxyCmd = ReactiveCommand.CreateFromTask(async () =>
         {
             await UpdateSubscriptionProcess(_config.SubIndexId, true);
+        });
+
+        //智飞云面板
+        PanelAccountCmd = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await PanelAccountAsync();
+        });
+
+        PanelShopCmd = ReactiveCommand.CreateFromTask(async () =>
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = Handler.Panel.PanelConfig.PanelBaseUrl + "/user/shop",
+                    UseShellExecute = true,
+                });
+            }
+            catch { }
+        });
+
+        PanelLogoutCmd = ReactiveCommand.CreateFromTask(async () =>
+        {
+            Handler.Panel.PanelSession.Logout();
+            await Task.CompletedTask;
+            System.Windows.Application.Current.Shutdown();
         });
 
         //Setting
@@ -574,6 +607,27 @@ public partial class MainWindowViewModel : MyReactiveObject
         {
             await RefreshSubscriptions();
         }
+    }
+
+    /// <summary>
+    /// 智飞云：显示账户信息
+    /// </summary>
+    private async Task PanelAccountAsync()
+    {
+        try
+        {
+            var info = await Handler.Panel.PanelApi.FetchAccountInfoAsync();
+            var msg = info != null
+                ? $"邮箱: {Handler.Panel.PanelSession.LoggedInEmail}\n{info}"
+                : $"邮箱: {Handler.Panel.PanelSession.LoggedInEmail}\n(账户信息获取失败)";
+            System.Windows.MessageBox.Show(msg, "智飞云 - 我的账户",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            Handler.Logging.SaveLog("PanelAccount", ex);
+        }
+        await Task.CompletedTask;
     }
 
     public async Task UpdateSubscriptionProcess(string subId, bool blProxy)
