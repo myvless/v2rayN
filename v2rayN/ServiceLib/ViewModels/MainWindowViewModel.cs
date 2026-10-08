@@ -227,7 +227,7 @@ public partial class MainWindowViewModel : MyReactiveObject
         {
             Handler.Panel.PanelSession.Logout();
             await Task.CompletedTask;
-            System.Windows.Application.Current.Shutdown();
+            // 退出应用由各平台自行处理
         });
 
         //Setting
@@ -610,18 +610,17 @@ public partial class MainWindowViewModel : MyReactiveObject
     }
 
     /// <summary>
-    /// 智飞云：显示账户信息
+    /// 智飞云：打开面板用户中心查看账户信息
     /// </summary>
     private async Task PanelAccountAsync()
     {
         try
         {
-            var info = await Handler.Panel.PanelApi.FetchAccountInfoAsync();
-            var msg = info != null
-                ? $"邮箱: {Handler.Panel.PanelSession.LoggedInEmail}\n{info}"
-                : $"邮箱: {Handler.Panel.PanelSession.LoggedInEmail}\n(账户信息获取失败)";
-            System.Windows.MessageBox.Show(msg, "智飞云 - 我的账户",
-                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = Handler.Panel.PanelConfig.PanelBaseUrl + Handler.Panel.PanelConfig.PathUser,
+                UseShellExecute = true,
+            });
         }
         catch (Exception ex)
         {
