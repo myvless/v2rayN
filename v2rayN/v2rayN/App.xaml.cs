@@ -89,7 +89,7 @@ public partial class App
                 }
                 catch (Exception ex)
                 {
-                    ServiceLib.Handler.Logging.SaveLog("PanelAutoImport", ex);
+                    Logging.SaveLog("PanelAutoImport", ex);
                 }
             });
         }

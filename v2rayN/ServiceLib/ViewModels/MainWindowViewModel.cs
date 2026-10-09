@@ -624,7 +624,7 @@ public partial class MainWindowViewModel : MyReactiveObject
         }
         catch (Exception ex)
         {
-            Handler.Logging.SaveLog("PanelAccount", ex);
+            Logging.SaveLog("PanelAccount", ex);
         }
         await Task.CompletedTask;
     }
