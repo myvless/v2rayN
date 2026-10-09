@@ -63,7 +63,7 @@ public partial class PanelLoginWindow : Window
         // 在浏览器中打开注册页面
         Process.Start(new ProcessStartInfo
         {
-            FileName = PanelConfig.PanelBaseUrl + PanelConfig.PathRegister,
+            FileName = "https://panel.020178.xyz/auth/register",
             UseShellExecute = true,
         });
     }
