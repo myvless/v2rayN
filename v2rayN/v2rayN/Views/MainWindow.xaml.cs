@@ -64,8 +64,10 @@ public partial class MainWindow
 
             //智飞云面板
             this.BindCommand(ViewModel, vm => vm.PanelAccountCmd, v => v.menuPanelAccount).DisposeWith(disposables);
+            this.BindCommand(ViewModel, vm => vm.PanelRefreshSubCmd, v => v.menuPanelRefreshSub).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.PanelShopCmd, v => v.menuPanelShop).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.PanelLogoutCmd, v => v.menuPanelLogout).DisposeWith(disposables);
+            ServiceLib.ViewModels.MainWindowViewModel.OpenPanelAccountRequested += OpenPanelAccountWindow;
 
             //setting
             this.BindCommand(ViewModel, vm => vm.OptionSettingCmd, v => v.menuOptionSetting).DisposeWith(disposables);
@@ -457,6 +459,21 @@ public partial class MainWindow
         {
             ProcUtils.ProcessStart(item.Tag.ToString());
         }
+    }
+
+    /// <summary>
+    /// 智飞云：打开「我的账户」窗口
+    /// </summary>
+    private void OpenPanelAccountWindow()
+    {
+        Dispatcher.Invoke(() =>
+        {
+            var win = new PanelAccountWindow
+            {
+                Owner = this
+            };
+            win.ShowDialog();
+        });
     }
 
     #endregion UI

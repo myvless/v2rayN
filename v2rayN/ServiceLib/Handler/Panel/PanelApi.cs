@@ -136,55 +136,97 @@ public static class PanelApi
 
     /// <summary>
     /// 获取账户信息（流量、到期时间）
-    /// 优先从订阅响应的 Subscription-Userinfo 头解析
+    /// 优先从订阅响应的 Subscription-Userinfo 头解析，失败回退解析 /user 页面
     /// </summary>
-    public static async Task<string?> FetchAccountInfoAsync()
+    public static async Task<PanelUserInfo> FetchAccountInfoAsync()
     {
+        // 先尝试从订阅的 Subscription-Userinfo 头获取（最可靠）
         try
         {
             var subResult = await FetchSubscriptionUrlAsync();
-            if (!subResult.Success)
+            if (subResult.Success)
             {
-                return null;
-            }
-
-            var resp = await _client.GetAsync(subResult.Message);
-            if (resp.Headers.TryGetValues("Subscription-Userinfo", out var values))
-            {
-                var header = string.Join(";", values);
-                // 解析 upload=xxx; download=xxx; total=xxx; expire=xxx
-                var dict = new Dictionary<string, string>();
-                foreach (var part in header.Split(';'))
+                var resp = await _client.GetAsync(subResult.Message);
+                if (resp.Headers.TryGetValues("Subscription-Userinfo", out var values))
                 {
-                    var kv = part.Split('=', 2);
-                    if (kv.Length == 2)
+                    var header = string.Join(";", values);
+                    // 解析 upload=xxx; download=xxx; total=xxx; expire=xxx
+                    var dict = new Dictionary<string, string>();
+                    foreach (var part in header.Split(';'))
                     {
-                        dict[kv[0].Trim()] = kv[1].Trim();
+                        var kv = part.Split('=', 2);
+                        if (kv.Length == 2)
+                        {
+                            dict[kv[0].Trim()] = kv[1].Trim();
+                        }
+                    }
+
+                    if (dict.TryGetValue("total", out var totalStr) &&
+                        long.TryParse(totalStr, out var total) && total > 0)
+                    {
+                        var upload = dict.TryGetValue("upload", out var u) && long.TryParse(u, out var uv) ? uv : 0;
+                        var download = dict.TryGetValue("download", out var d) && long.TryParse(d, out var dv) ? dv : 0;
+                        var used = upload + download;
+                        var percent = (float)used / total;
+                        if (percent < 0) percent = 0;
+                        if (percent > 1) percent = 1;
+
+                        var expireDate = string.Empty;
+                        if (dict.TryGetValue("expire", out var expireStr) &&
+                            long.TryParse(expireStr, out var expireTs) && expireTs > 0)
+                        {
+                            expireDate = DateTimeOffset.FromUnixTimeSeconds(expireTs).LocalDateTime.ToString("yyyy-MM-dd");
+                        }
+
+                        return new PanelUserInfo(
+                            PanelSession.LoggedInEmail ?? string.Empty,
+                            expireDate,
+                            FormatBytes(used),
+                            FormatBytes(total),
+                            percent);
                     }
                 }
-
-                if (dict.TryGetValue("total", out var totalStr) &&
-                    dict.TryGetValue("upload", out var uploadStr) &&
-                    dict.TryGetValue("download", out var downloadStr))
-                {
-                    var total = long.Parse(totalStr);
-                    var used = long.Parse(uploadStr) + long.Parse(downloadStr);
-                    var remaining = total - used;
-
-                    var info = $"剩余流量: {FormatBytes(remaining)} / {FormatBytes(total)}";
-                    if (dict.TryGetValue("expire", out var expireStr) && long.Parse(expireStr) > 0)
-                    {
-                        var expire = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expireStr)).LocalDateTime;
-                        info += $"\n到期时间: {expire:yyyy-MM-dd}";
-                    }
-                    return info;
-                }
             }
-            return null;
+        }
+        catch { }
+
+        // 回退：解析 /user 页面 HTML
+        try
+        {
+            var resp = await _client.GetAsync(PanelConfig.PanelBaseUrl + PanelConfig.PathUser);
+            if (!resp.IsSuccessStatusCode)
+            {
+                return new PanelUserInfo(PanelSession.LoggedInEmail ?? string.Empty);
+            }
+            var html = await resp.Content.ReadAsStringAsync();
+
+            var used = string.Empty;
+            var total = string.Empty;
+            var percent = 0f;
+            var m = Regex.Match(html, @"([\d.]+\s*[KMGT]?B)\s*/\s*([\d.]+\s*[KMGT]?B)");
+            if (m.Success)
+            {
+                used = m.Groups[1].Value;
+                total = m.Groups[2].Value;
+            }
+            m = Regex.Match(html, @"(\d+(?:\.\d+)?)\s*%");
+            if (m.Success && float.TryParse(m.Groups[1].Value, out var p))
+            {
+                percent = p / 100f;
+                if (percent < 0) percent = 0;
+                if (percent > 1) percent = 1;
+            }
+            var expire = string.Empty;
+            m = Regex.Match(html, @"到期[^<]{0,30}?(\d{4}-\d{2}-\d{2})");
+            if (m.Success)
+            {
+                expire = m.Groups[1].Value;
+            }
+            return new PanelUserInfo(PanelSession.LoggedInEmail ?? string.Empty, expire, used, total, percent);
         }
         catch
         {
-            return null;
+            return new PanelUserInfo(PanelSession.LoggedInEmail ?? string.Empty);
         }
     }
 

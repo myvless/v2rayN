@@ -56,6 +56,8 @@ public partial class MainWindowViewModel : MyReactiveObject
 
     public ReactiveCommand<RxVoid, RxVoid> PanelLogoutCmd { get; }
 
+    public ReactiveCommand<RxVoid, RxVoid> PanelRefreshSubCmd { get; }
+
     //Setting
     public ReactiveCommand<RxVoid, RxVoid> OptionSettingCmd { get; }
 
@@ -228,6 +230,12 @@ public partial class MainWindowViewModel : MyReactiveObject
             Handler.Panel.PanelSession.Logout();
             await Task.CompletedTask;
             // 退出应用由各平台自行处理
+        });
+
+        PanelRefreshSubCmd = ReactiveCommand.CreateFromTask(async () =>
+        {
+            var ok = await Handler.Panel.PanelSubscriptionImporter.ImportAsync(this);
+            NoticeManager.Instance.Enqueue(ok ? "面板订阅更新成功" : "面板订阅更新失败，请检查网络后重试");
         });
 
         //Setting
@@ -610,17 +618,18 @@ public partial class MainWindowViewModel : MyReactiveObject
     }
 
     /// <summary>
-    /// 智飞云：打开面板用户中心查看账户信息
+    /// 智飞云：请求打开「我的账户」窗口（由 MainWindow 订阅并打开实际窗口）
+    /// </summary>
+    public static event Action? OpenPanelAccountRequested;
+
+    /// <summary>
+    /// 智飞云：打开「我的账户」窗口
     /// </summary>
     private async Task PanelAccountAsync()
     {
         try
         {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = Handler.Panel.PanelConfig.PanelBaseUrl + Handler.Panel.PanelConfig.PathUser,
-                UseShellExecute = true,
-            });
+            OpenPanelAccountRequested?.Invoke();
         }
         catch (Exception ex)
         {

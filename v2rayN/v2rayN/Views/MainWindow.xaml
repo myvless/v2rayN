@@ -254,6 +254,10 @@
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="我的账户" />
                                 <MenuItem
+                                    x:Name="menuPanelRefreshSub"
+                                    Height="{StaticResource MenuItemHeight}"
+                                    Header="更新订阅" />
+                                <MenuItem
                                     x:Name="menuPanelShop"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="购买套餐" />
