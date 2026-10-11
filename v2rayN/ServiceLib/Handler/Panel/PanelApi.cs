@@ -103,6 +103,8 @@ public static class PanelApi
     /// <summary>
     /// 获取当前账号的订阅链接
     /// GET /user（需登录态），从页面 HTML 中解析订阅地址
+    /// 新版面板渲染 {$UniversalSub} 即 https://panel.020178.xyz/sub/{token}，
+    /// V2Ray 格式为 …/sub/{token}/v2ray；旧版面板用 /link/{token}?sub=1
     /// </summary>
     public static async Task<ApiResult> FetchSubscriptionUrlAsync()
     {
@@ -115,17 +117,43 @@ public static class PanelApi
             }
             var html = await resp.Content.ReadAsStringAsync();
 
-            // 面板用户中心页面内嵌订阅链接，形如 https://panel.020178.xyz/link/xxx?sub=1
-            var match = Regex.Match(html, @"https?://[^""'<>\s]+/link/[^""'<>\s?]+(?:\?[^""'<>\s]*)?");
+            string? url = null;
+            // 1. 优先 V2Ray 格式（v2rayN 需要 vmess:// 链接）：…/sub/{token}/v2ray
+            var match = Regex.Match(html, @"https?://[^""'<>\s""]+/sub/[^""'<>\s""/]+/v2ray(?=[""'\s>])");
             if (match.Success)
             {
-                var url = match.Value;
-                if (!url.Contains("sub="))
+                url = match.Value;
+            }
+            else
+            {
+                // 2. 退回通用订阅地址 …/sub/{token}，v2rayN 直接取其 v2ray 子格式
+                match = Regex.Match(html, @"https?://[^""'<>\s""]+/sub/[^""'<>\s""/]+(?=[""'\s>])");
+                if (match.Success)
                 {
-                    url += url.Contains("?") ? "&sub=1" : "?sub=1";
+                    url = match.Value + "/v2ray";
                 }
+                else
+                {
+                    // 3. 兼容旧版面板 /link/{token}
+                    match = Regex.Match(html, @"https?://[^""'<>\s]+/link/[^""'<>\s?]+(?:\?[^""'<>\s]*)?");
+                    if (match.Success)
+                    {
+                        url = match.Value;
+                        // 旧版 /link/ 地址需要 ?sub=1 参数；新版 /sub/ 地址格式已在路径中
+                        if (!url.Contains("sub="))
+                        {
+                            url += url.Contains("?") ? "&sub=1" : "?sub=1";
+                        }
+                    }
+                }
+            }
+
+            if (url != null)
+            {
+                Logging.SaveLog($"PanelApi: 订阅URL: {url[..Math.Min(60, url.Length)]}...");
                 return new ApiResult(true, url);
             }
+            Logging.SaveLog("PanelApi: 未在 /user 页面找到订阅链接");
             return new ApiResult(false, "未找到订阅链接，请确认账号有效");
         }
         catch (Exception ex)
@@ -203,18 +231,39 @@ public static class PanelApi
             var used = string.Empty;
             var total = string.Empty;
             var percent = 0f;
-            var m = Regex.Match(html, @"([\d.]+\s*[KMGT]?B)\s*/\s*([\d.]+\s*[KMGT]?B)");
-            if (m.Success)
+            // 新版模板：过去用量 X / 今日用量 Y / 剩余流量 Z（分开显示，无 X/Y 形式）
+            var mUsed = Regex.Match(html, @"过去用量[^0-9]*([\d.]+\s*[KMGT]?B)");
+            var mRemain = Regex.Match(html, @"剩余流量[^0-9]*([\d.]+\s*[KMGT]?B)");
+            if (mUsed.Success && mRemain.Success)
             {
-                used = m.Groups[1].Value;
-                total = m.Groups[2].Value;
+                used = mUsed.Groups[1].Value;
+                var usedBytes = ParseBytes(used);
+                var remainBytes = ParseBytes(mRemain.Groups[1].Value);
+                var totalBytes = usedBytes + remainBytes;
+                if (totalBytes > 0)
+                {
+                    total = FormatBytes(totalBytes);
+                    percent = (float)usedBytes / totalBytes;
+                    if (percent < 0) percent = 0;
+                    if (percent > 1) percent = 1;
+                }
             }
-            m = Regex.Match(html, @"(\d+(?:\.\d+)?)\s*%");
-            if (m.Success && float.TryParse(m.Groups[1].Value, out var p))
+            else
             {
-                percent = p / 100f;
-                if (percent < 0) percent = 0;
-                if (percent > 1) percent = 1;
+                // 兼容旧版 X / Y 形式
+                var m = Regex.Match(html, @"([\d.]+\s*[KMGT]?B)\s*/\s*([\d.]+\s*[KMGT]?B)");
+                if (m.Success)
+                {
+                    used = m.Groups[1].Value;
+                    total = m.Groups[2].Value;
+                }
+                m = Regex.Match(html, @"(\d+(?:\.\d+)?)\s*%");
+                if (m.Success && float.TryParse(m.Groups[1].Value, out var p))
+                {
+                    percent = p / 100f;
+                    if (percent < 0) percent = 0;
+                    if (percent > 1) percent = 1;
+                }
             }
             var expire = string.Empty;
             m = Regex.Match(html, @"到期[^<]{0,30}?(\d{4}-\d{2}-\d{2})");
@@ -228,6 +277,25 @@ public static class PanelApi
         {
             return new PanelUserInfo(PanelSession.LoggedInEmail ?? string.Empty);
         }
+    }
+
+    private static long ParseBytes(string text)
+    {
+        // 解析 "1.5 GB" / "300 MB" / "0 B" 为字节数
+        var m = Regex.Match(text.Trim(), @"([\d.]+)\s*([KMGT]?)B");
+        if (!m.Success || !double.TryParse(m.Groups[1].Value, out var num))
+        {
+            return 0;
+        }
+        var mult = m.Groups[2].Value switch
+        {
+            "K" => 1024L,
+            "M" => 1024L * 1024,
+            "G" => 1024L * 1024 * 1024,
+            "T" => 1024L * 1024 * 1024 * 1024,
+            _ => 1L,
+        };
+        return (long)(num * mult);
     }
 
     private static string FormatBytes(long bytes)
