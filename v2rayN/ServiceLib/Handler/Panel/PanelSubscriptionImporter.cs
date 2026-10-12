@@ -46,8 +46,15 @@ public static class PanelSubscriptionImporter
             }
             Logging.SaveLog("PanelSubscriptionImporter: 订阅已添加，开始更新节点");
 
-            // 触发订阅更新（直接调用，不用反射）
-            await viewModel.UpdateSubscriptionProcess("", false);
+            // 只更新这一个订阅（AddSubItem 已在 subItem 上生成 Id）
+            await viewModel.UpdateSubscriptionProcess(subItem.Id, false);
+
+            // 同步界面：选中"面板订阅"分组，刷新分组列表与节点列表，
+            // 避免分组页签引用已删除的旧订阅导致点进去是空的
+            var config = AppManager.Instance.Config;
+            config.SubIndexId = subItem.Id;
+            await viewModel.ProfilesViewModel.RefreshSubscriptions();
+            await viewModel.ProfilesViewModel.RefreshServersBiz();
 
             Logging.SaveLog("PanelSubscriptionImporter: 面板订阅导入完成");
             return true;
