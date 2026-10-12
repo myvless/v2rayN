@@ -46,6 +46,32 @@
                         KeyboardNavigation.TabNavigation="Continue"
                         Style="{StaticResource MaterialDesignToolBar}">
                         <Menu Margin="0,1" Style="{StaticResource ToolbarMenu}">
+                            <MenuItem Padding="{StaticResource MarginLeftRight8}">
+                                <MenuItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="智飞云" />
+                                    </StackPanel>
+                                </MenuItem.Header>
+                                <MenuItem
+                                    x:Name="menuPanelAccount"
+                                    Height="{StaticResource MenuItemHeight}"
+                                    Header="我的账户" />
+                                <MenuItem
+                                    x:Name="menuPanelRefreshSub"
+                                    Height="{StaticResource MenuItemHeight}"
+                                    Header="更新订阅" />
+                                <MenuItem
+                                    x:Name="menuPanelShop"
+                                    Height="{StaticResource MenuItemHeight}"
+                                    Header="购买套餐" />
+                                <MenuItem
+                                    x:Name="menuPanelLogout"
+                                    Height="{StaticResource MenuItemHeight}"
+                                    Header="退出登录" />
+                            </MenuItem>
+                        </Menu>
+                        <Separator />
+                        <Menu Margin="0,1" Style="{StaticResource ToolbarMenu}">
                             <MenuItem Padding="{StaticResource MarginLeftRight8}" AutomationProperties.Name="{x:Static resx:ResUI.menuServers}">
                                 <MenuItem.Header>
                                     <StackPanel Orientation="Horizontal">
@@ -243,48 +269,6 @@
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuOpenTheFileLocation}" />
                             </MenuItem>
-                            <MenuItem Padding="{StaticResource MarginLeftRight8}">
-                                <MenuItem.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="智飞云" />
-                                    </StackPanel>
-                                </MenuItem.Header>
-                                <MenuItem
-                                    x:Name="menuPanelAccount"
-                                    Height="{StaticResource MenuItemHeight}"
-                                    Header="我的账户" />
-                                <MenuItem
-                                    x:Name="menuPanelRefreshSub"
-                                    Height="{StaticResource MenuItemHeight}"
-                                    Header="更新订阅" />
-                                <MenuItem
-                                    x:Name="menuPanelShop"
-                                    Height="{StaticResource MenuItemHeight}"
-                                    Header="购买套餐" />
-                                <MenuItem
-                                    x:Name="menuPanelLogout"
-                                    Height="{StaticResource MenuItemHeight}"
-                                    Header="退出登录" />
-                            </MenuItem>
-                        </Menu>
-                        <Separator />
-                        <Menu Margin="0,1" Style="{StaticResource ToolbarMenu}">
-                            <MenuItem
-                                x:Name="menuHelp"
-                                Padding="{StaticResource MarginLeftRight8}"
-                                AutomationProperties.Name="{x:Static resx:ResUI.menuHelp}">
-                                <MenuItem.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon
-                                            Margin="{StaticResource MarginRight8}"
-                                            VerticalAlignment="Center"
-                                            Kind="HelpCircleOutline" />
-                                        <TextBlock Text="{x:Static resx:ResUI.menuHelp}" />
-                                    </StackPanel>
-                                </MenuItem.Header>
-                                <MenuItem x:Name="menuCheckUpdate" Header="{x:Static resx:ResUI.menuCheckUpdate}" />
-                                <Separator Margin="-40,5" />
-                            </MenuItem>
                         </Menu>
                         <Separator />
                         <Menu Margin="0,1" Style="{StaticResource ToolbarMenu}">
@@ -299,23 +283,6 @@
                                             VerticalAlignment="Center"
                                             Kind="Reload" />
                                         <TextBlock Text="{x:Static resx:ResUI.menuReload}" />
-                                    </StackPanel>
-                                </MenuItem.Header>
-                            </MenuItem>
-                        </Menu>
-                        <Separator />
-                        <Menu Margin="0,1" Style="{StaticResource ToolbarMenu}">
-                            <MenuItem
-                                x:Name="menuPromotion"
-                                Padding="{StaticResource MarginLeftRight8}"
-                                AutomationProperties.Name="{x:Static resx:ResUI.menuPromotion}">
-                                <MenuItem.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon
-                                            Margin="{StaticResource MarginRight8}"
-                                            VerticalAlignment="Center"
-                                            Kind="VolumeHigh" />
-                                        <TextBlock Text="{x:Static resx:ResUI.menuPromotion}" />
                                     </StackPanel>
                                 </MenuItem.Header>
                             </MenuItem>
