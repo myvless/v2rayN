@@ -266,7 +266,7 @@ public static class PanelApi
                 }
             }
             var expire = string.Empty;
-            m = Regex.Match(html, @"到期[^<]{0,30}?(\d{4}-\d{2}-\d{2})");
+            var m = Regex.Match(html, @"到期[^<]{0,30}?(\d{4}-\d{2}-\d{2})");
             if (m.Success)
             {
                 expire = m.Groups[1].Value;
