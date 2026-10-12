@@ -251,14 +251,14 @@ public static class PanelApi
             else
             {
                 // 兼容旧版 X / Y 形式
-                var m = Regex.Match(html, @"([\d.]+\s*[KMGT]?B)\s*/\s*([\d.]+\s*[KMGT]?B)");
-                if (m.Success)
+                var mOld = Regex.Match(html, @"([\d.]+\s*[KMGT]?B)\s*/\s*([\d.]+\s*[KMGT]?B)");
+                if (mOld.Success)
                 {
-                    used = m.Groups[1].Value;
-                    total = m.Groups[2].Value;
+                    used = mOld.Groups[1].Value;
+                    total = mOld.Groups[2].Value;
                 }
-                m = Regex.Match(html, @"(\d+(?:\.\d+)?)\s*%");
-                if (m.Success && float.TryParse(m.Groups[1].Value, out var p))
+                mOld = Regex.Match(html, @"(\d+(?:\.\d+)?)\s*%");
+                if (mOld.Success && float.TryParse(mOld.Groups[1].Value, out var p))
                 {
                     percent = p / 100f;
                     if (percent < 0) percent = 0;
