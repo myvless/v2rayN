@@ -51,7 +51,6 @@ public static class PanelSubscriptionImporter
 
             // 同步界面：选中"面板订阅"分组，刷新分组列表与节点列表，
             // 避免分组页签引用已删除的旧订阅导致点进去是空的
-            var config = AppManager.Instance.Config;
             config.SubIndexId = subItem.Id;
             await viewModel.ProfilesViewModel.RefreshSubscriptions();
             await viewModel.ProfilesViewModel.RefreshServersBiz();
