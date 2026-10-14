@@ -56,10 +56,11 @@ public sealed class CoreInfoManager
 
         if (RuntimeInformation.ProcessArchitecture != Architecture.X86)
         {
-            if (IsCheckUpdateSupported(ECoreType.v2rayN))
-            {
-                lst.Add(ECoreType.v2rayN);
-            }
+            // 智飞云定制版：移除 v2rayN 本体的更新检查（防止覆盖定制版）
+            // if (IsCheckUpdateSupported(ECoreType.v2rayN))
+            // {
+            //     lst.Add(ECoreType.v2rayN);
+            // }
 
             if (!(Utils.IsWindows() && Environment.OSVersion.Version.Major < 10))
             {

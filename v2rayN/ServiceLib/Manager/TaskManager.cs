@@ -130,9 +130,6 @@ public class TaskManager
 
     private async Task UpdateTaskRunCheckUpdate()
     {
-        // 智飞云定制版：禁用自动检查更新（避免覆盖定制版）
-        await Task.CompletedTask;
-        return;
         Logging.SaveLog("Execute check update");
 
         var updateService = new UpdateService(_config, async (success, msg) => await Task.CompletedTask);
