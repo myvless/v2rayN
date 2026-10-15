@@ -4,17 +4,17 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="智飞云 - 面板登录"
     Width="380"
-    Height="320"
+    Height="340"
     WindowStartupLocation="CenterScreen"
     ResizeMode="NoResize">
     <StackPanel Margin="24" VerticalAlignment="Center">
-        <TextBlock
-            Text="智飞云"
+        <Label
+            Content="智飞云"
             FontSize="24"
             FontWeight="Bold"
             HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Height="48"
+            VerticalContentAlignment="Center"
+            Height="60"
             Margin="0,0,0,16" />
         <TextBlock Text="邮箱" Margin="0,0,0,4" />
         <TextBox
