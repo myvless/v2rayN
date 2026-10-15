@@ -13,9 +13,9 @@
             FontSize="24"
             FontWeight="Bold"
             HorizontalAlignment="Center"
-            Margin="0,0,0,16"
-            Padding="0,6,0,6"
-            LineHeight="36" />
+            VerticalAlignment="Center"
+            Height="48"
+            Margin="0,0,0,16" />
         <TextBlock Text="邮箱" Margin="0,0,0,4" />
         <TextBox
             x:Name="txtEmail"

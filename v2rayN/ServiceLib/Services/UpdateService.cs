@@ -177,7 +177,8 @@ public partial class UpdateService(Config config, Func<bool, string, Task> updat
         if (preRelease || coreInfo?.LockedMaxVersion != null)
         {
             var url = coreInfo?.ReleaseApiUrl;
-            var result = await downloadHandle.TryDownloadString(url, blProxy, Global.AppName, cancellationToken);
+            // 智飞云定制版：User-Agent 必须用 ASCII，中文会导致 net_http_headers_invalid_value
+            var result = await downloadHandle.TryDownloadString(url, blProxy, "v2rayN", cancellationToken);
             if (result.IsNullOrEmpty())
             {
                 return new UpdateResult(false, "");
