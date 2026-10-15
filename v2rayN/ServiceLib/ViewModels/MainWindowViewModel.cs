@@ -218,7 +218,7 @@ public partial class MainWindowViewModel : MyReactiveObject
             {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                 {
-                    FileName = Handler.Panel.PanelConfig.PanelBaseUrl + "/user/shop",
+                    FileName = Handler.Panel.PanelConfig.PanelBaseUrl + "/user/product",
                     UseShellExecute = true,
                 });
             }
